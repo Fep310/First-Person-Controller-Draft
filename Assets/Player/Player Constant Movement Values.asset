@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1440d443b684d614087d85950aca0157, type: 3}
+  m_Name: Player Constant Movement Values
+  m_EditorClassIdentifier: 
+  walkMoveSpeed: 5.3
+  sprintMoveSpeed: 7
+  crouchMoveSpeed: 3.5
+  horizontalAcceleration: 12
+  horizontalDeacceleration: 20
+  airHorizontalStiffness: 3
+  jumpHeight: 1.65
+  jumpTime: 0.4
+  runJumpBoost: 2
+  slideJumpHeight: 1.3
+  slideJumpTime: 0.35
+  slideJumpBoost: 4.2
+  slideMaxMoveSpeed: 8
+  minSlideTime: 0.8
+  slideSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.29472718
+      outSlope: 0.29472718
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.08892356
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2.359256
+      outSlope: 2.359256
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.029641211
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 8
+  collisionRayLenght: 0.1
+  mouseLookSensitivity: 0.05
