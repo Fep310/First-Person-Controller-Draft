@@ -16,7 +16,7 @@ public class RunState : GroundParentState
 
         if (inputData.IsPressingCrouch)
         {
-            stateMachine.ChangeState(states.Slide);
+            stateMachine.ChangeState(states.ToSlide);
             return;
         }
 
@@ -41,11 +41,13 @@ public class RunState : GroundParentState
         player.FovController.IncreaseFov();
     }
 
-    public override void OnExit(PlayerState next) { }
+    public override void OnExit(PlayerState next) => base.OnExit(next);
 
     public override void OnUpdate()
     {
         DoChecks();
+
+        player.CameraAnimations.UpdateSway(inputData.HorizontalMovementInput.x);
 
         WorldPlayerDirectionOnSlopes();
 
@@ -63,10 +65,15 @@ public class RunState : GroundParentState
             movementData.finalVelocity = Vector3.ProjectOnPlane(movementData.finalVelocity, movementData.groundNormal);
 
         ApplyVelocity();
+
+        if (crouching)
+            TryToStandup();
     }
 
-    protected override void ApplyJumpForce()
+    public override void ApplyJumpForce()
     {
+        movementData.jumping = true;
+
         movementData.verticalVel = movementData.JumpForce;
         movementData.appliedVerticalVel = movementData.JumpForce;
 
@@ -78,5 +85,7 @@ public class RunState : GroundParentState
             movementData.horizontalVel.y + horizontalBoost.y);
         
         ApplyVelocity();
+
+        player.CameraAnimations.JumpBob(1.2f);
     }
 }

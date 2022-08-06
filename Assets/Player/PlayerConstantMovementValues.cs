@@ -22,12 +22,15 @@ public class PlayerConstantMovementValues : ScriptableObject
     [SerializeField] [Range(0f, 5f)] private float slideJumpHeight;
     [SerializeField] [Range(0f, 2f)] private float slideJumpTime;
     [SerializeField] [Range(1f, 5f)] private float slideJumpBoost;
+    [SerializeField][Range(0f, 1f)] private float coyoteTime;
 
     [Space]
     [Header("Slide")]
     [SerializeField] [Range(.1f, 15f)] private float slideMaxMoveSpeed;
+    [SerializeField][Range(0f, 1f)] private float slideTransitionTime;
     [SerializeField] [Range(0f, 3f)] private float minSlideTime;
     [SerializeField] private AnimationCurve slideSpeedCurve;
+    [SerializeField] [Range(.1f, 30f)] private float maxSteepSlopeSpeed;
 
     [Space]
     [Header("Misc")]
@@ -49,10 +52,13 @@ public class PlayerConstantMovementValues : ScriptableObject
     public float SlideJumpHeight { get => slideJumpHeight; private set => slideJumpHeight = value; }
     public float SlideJumpTime { get => slideJumpTime; private set => slideJumpTime = value; }
     public float SlideJumpBoost { get => slideJumpBoost; private set => slideJumpBoost = value; }
+    public float CoyoteTime { get => coyoteTime; private set => coyoteTime = value; }
 
     public float SlideMaxMoveSpeed { get => slideMaxMoveSpeed; private set => slideMaxMoveSpeed = value; }
+    public float SlideTransitionTime { get => slideTransitionTime; private set => slideTransitionTime = value; }
     public float MinSlideTime { get => minSlideTime; private set => minSlideTime = value; }
     public AnimationCurve SlideSpeedCurve { get => slideSpeedCurve; private set => slideSpeedCurve = value; }
+    public float MaxSteepSlopeSpeed { get => maxSteepSlopeSpeed; private set => maxSteepSlopeSpeed = value; }
 
     public LayerMask CollisionMask { get => collisionMask; private set => collisionMask = value; }
     public float CollisionRayLenght { get => collisionRayLenght; private set => collisionRayLenght = value; }

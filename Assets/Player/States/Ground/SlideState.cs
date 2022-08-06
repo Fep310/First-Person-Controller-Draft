@@ -10,10 +10,11 @@ public class SlideState : GroundParentState
     {
     }
 
+    private float actualStartTime;
+
     private Vector2 slideVector;
     private Vector2 slideDirection;
     private Vector2 maxVelocity;
-    private Vector2 slopeDirection;
     private float inter;
     private float endTime;
     private float extraTime;
@@ -25,7 +26,7 @@ public class SlideState : GroundParentState
 
         if (inter >= 1)
         {
-            if (inputData.IsPressingCrouch)
+            if (inputData.IsPressingCrouch || !CanStandup)
             {
                 stateMachine.ChangeState(inputData.HorizontalMovementInput == Vector2.zero ? states.IdleCrouch : states.WalkCrouch);
                 return;
@@ -47,7 +48,7 @@ public class SlideState : GroundParentState
             }
         }
 
-        if (!inputData.IsPressingCrouch)
+        if (!inputData.IsPressingCrouch && CanStandup)
         {
             stateMachine.ChangeState(
                 inputData.IsPressingSprint && Vector2.Dot(Vector2.up, inputData.HorizontalMovementInput) > .38f ?
@@ -57,6 +58,7 @@ public class SlideState : GroundParentState
 
     public override void OnEnter(PlayerState previous)
     {
+        actualStartTime = Time.time;
         startTime = Time.time;
         endTime = startTime + constValues.MinSlideTime;
         inter = 0;
@@ -64,13 +66,18 @@ public class SlideState : GroundParentState
         keepSliding = false;
 
         WorldPlayerDirectionOnSlopes();
-        slideVector = new Vector2(movementData.worldPlayerDiretion.x, movementData.worldPlayerDiretion.z);
+
+        if (onSteepSlope)
+            slideVector = new Vector2(movementData.groundNormal.x, movementData.groundNormal.z);
+        else
+            slideVector = new Vector2(movementData.worldPlayerDiretion.x, movementData.worldPlayerDiretion.z);
+        
         slideDirection = slideVector.normalized;
         maxVelocity = slideDirection * constValues.SlideMaxMoveSpeed;
 
         UpdateExtraSlideTime();
 
-        player.CrouchAnimator.Crouch();
+        crouching = true;
     }
 
     public override void OnUpdate()
@@ -89,7 +96,7 @@ public class SlideState : GroundParentState
 
         movementData.finalVelocity = new Vector3(movementData.horizontalVel.x, movementData.appliedVerticalVel, movementData.horizontalVel.y);
 
-        if (movementData.groundNormal != Vector3.up && Vector3.Angle(Vector3.up, movementData.groundNormal) < 45)
+        if (Vector3.Angle(Vector3.up, movementData.groundNormal) < 45)
             movementData.finalVelocity = Vector3.ProjectOnPlane(movementData.finalVelocity, movementData.groundNormal);
 
         ApplyVelocity();
@@ -97,10 +104,12 @@ public class SlideState : GroundParentState
 
     public override void OnExit(PlayerState next)
     {
-        if (next is not CrouchParentState)
-            player.CrouchAnimator.StandUp();
+        base.OnExit(next);
 
-        if (next is not RunState || next is not AirborneState)
+        if (next is not CrouchParentState)
+            TryToStandup();
+
+        if (!(next is RunState || next is AirborneState))
             player.FovController.DecreaseFov();
     }
 
@@ -108,7 +117,6 @@ public class SlideState : GroundParentState
     {
         var groundNormalXZ = new Vector2(movementData.groundNormal.x, movementData.groundNormal.z);
         extraTime = Mathf.Clamp(Vector2.Dot(slideVector, groundNormalXZ) * 2f, -constValues.MinSlideTime / 2, 1);
-        
 
         if (extraTime >= .5f)
         {
@@ -120,14 +128,15 @@ public class SlideState : GroundParentState
         else
             keepSliding = false;
 
-        player.debug.SetDebugText(
-            $"Dot({slideVector}, {groundNormalXZ}) * 2\n" +
-            $"extraTime: {extraTime}\n" +
-            $"keepSliding: {keepSliding}");
+        /*player.debug.SetLine(0, $"Dot({slideVector}, {groundNormalXZ}) * 2");
+        player.debug.SetLine(1, $"extraTime: {extraTime}");
+        player.debug.SetLine(2, $"keepSliding: {keepSliding}");*/
     }
 
-    protected override void ApplyJumpForce()
+    public override void ApplyJumpForce()
     {
+        movementData.jumping = true;
+
         movementData.verticalVel = movementData.SlideJumpForce;
         movementData.appliedVerticalVel = movementData.SlideJumpForce;
 
@@ -139,5 +148,7 @@ public class SlideState : GroundParentState
             movementData.horizontalVel.y + horizontalBoost.y);
 
         ApplyVelocity();
+
+        player.CameraAnimations.JumpBob(1.2f);
     }
 }

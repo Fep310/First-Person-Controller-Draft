@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,9 @@ public class PlayerInputData : MonoBehaviour
     public bool IsPressingJump { get; private set; }
     public bool IsPressingSprint { get; private set; }
     public bool IsPressingCrouch { get; private set; }
+    public bool IsPressingLeftClick { get; private set; }
+
+    public event Action OnLeftClickDown, OnLeftClickUp;
 
     public void UpdateHorizontalMovementInput(InputAction.CallbackContext context)
     {
@@ -46,5 +50,19 @@ public class PlayerInputData : MonoBehaviour
 
         else if (context.canceled)
             IsPressingCrouch = false;
+    }
+
+    public void UpdateLeftClickInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            IsPressingLeftClick = true;
+            OnLeftClickDown?.Invoke();
+        }
+        else if (context.canceled)
+        {
+            IsPressingLeftClick = false;
+            OnLeftClickUp?.Invoke();
+        }
     }
 }

@@ -18,6 +18,12 @@ public abstract class CrouchParentState : PlayerState
             return;
         }
 
+        if (onSteepSlope)
+        {
+            stateMachine.ChangeState(states.SteepSlope);
+            return;
+        }
+
         /*if (inputData.IsPressingJump)
         {
             jumping = true;
@@ -44,14 +50,21 @@ public abstract class CrouchParentState : PlayerState
     {
         base.OnEnter(previous);
 
+        crouching = true;
+
         if (previous is not CrouchParentState && !inputData.IsPressingJump)
             player.CrouchAnimator.Crouch();
+
+        player.CameraAnimations.UpdateSway(0);
     }
 
     public override void OnExit(PlayerState next)
     {
         if (next is not CrouchParentState)
+        {
             player.CrouchAnimator.StandUp();
+            crouching = false;
+        }
     }
 
     public override void OnUpdate() { }

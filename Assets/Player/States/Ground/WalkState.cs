@@ -35,11 +35,13 @@ public class WalkState : GroundParentState
 
     public override void OnEnter(PlayerState previous) => base.OnEnter(previous);
 
-    public override void OnExit(PlayerState next) { }
+    public override void OnExit(PlayerState next) => base.OnExit(next);
 
     public override void OnUpdate()
     {
         DoChecks();
+
+        player.CameraAnimations.UpdateSway(inputData.HorizontalMovementInput.x * .33f);
 
         WorldPlayerDirectionOnSlopes();
 
@@ -57,7 +59,10 @@ public class WalkState : GroundParentState
             movementData.finalVelocity = Vector3.ProjectOnPlane(movementData.finalVelocity, movementData.groundNormal);
 
         ApplyVelocity();
+
+        if (crouching)
+            TryToStandup();
     }
 
-    protected override void ApplyJumpForce() => base.ApplyJumpForce();
+    public override void ApplyJumpForce() => base.ApplyJumpForce();
 }

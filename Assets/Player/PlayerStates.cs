@@ -9,11 +9,14 @@ public class PlayerStates
     public IdleState Idle { get; private set; }
     public WalkState Walk { get; private set; }
     public RunState Run { get; private set; }
+    public ToSlideState ToSlide { get; private set; }
     public SlideState Slide { get; private set; }
 
-        #region crouch-states
+    public SteepSlopeState SteepSlope { get; private set; }
 
-        public IdleCrouchState IdleCrouch { get; private set; }
+    #region crouch-states
+
+    public IdleCrouchState IdleCrouch { get; private set; }
         public WalkCrouchState WalkCrouch { get; private set; }
 
         #endregion
@@ -23,7 +26,6 @@ public class PlayerStates
     #region air-states
 
     public AirborneState Airborne { get; private set; }
-    public FastFallState FastFall { get; private set; }
 
     #endregion
 
@@ -33,12 +35,13 @@ public class PlayerStates
         Idle = new IdleState(player, controller, this, stateMachine, constValues, movementData, inputData);
         Walk = new WalkState(player, controller, this, stateMachine, constValues, movementData, inputData);
         Run = new RunState(player, controller, this, stateMachine, constValues, movementData, inputData);
+        ToSlide = new ToSlideState(player, controller, this, stateMachine, constValues, movementData, inputData);
         Slide = new SlideState(player, controller, this, stateMachine, constValues, movementData, inputData);
+        SteepSlope = new SteepSlopeState(player, controller, this, stateMachine, constValues, movementData, inputData);
 
         IdleCrouch = new IdleCrouchState(player, controller, this, stateMachine, constValues, movementData, inputData);
         WalkCrouch = new WalkCrouchState(player, controller, this, stateMachine, constValues, movementData, inputData);
 
         Airborne = new AirborneState(player, controller, this, stateMachine, constValues, movementData, inputData);
-        FastFall = new FastFallState(player, controller, this, stateMachine, constValues, movementData, inputData);
     }
 }

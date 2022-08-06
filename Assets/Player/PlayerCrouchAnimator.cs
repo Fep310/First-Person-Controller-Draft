@@ -6,7 +6,7 @@ public class PlayerCrouchAnimator : MonoBehaviour
 {
     [SerializeField] private Player player;
     [SerializeField] private AnimationCurve crouchCurve;
-    [SerializeField] [Range(0f, 1f)] float transitionTime;
+    [SerializeField] private PlayerConstantMovementValues constValues;
 
     public float OriginalHeight { get; private set; }
     private float crouchHeight;
@@ -28,8 +28,8 @@ public class PlayerCrouchAnimator : MonoBehaviour
         crouchHeight = OriginalHeight / 1.5f;
         originalYCenter = player.Controller.center.y;
         crouchYCenter = originalYCenter / 1.5f;
-        originalCameraY = player.CameraHolder.localPosition.y;
-        crouchCameraY = .8f;
+        originalCameraY = player.Camera.transform.localPosition.y;
+        crouchCameraY = -.8f;
     }
 
     public void Crouch()
@@ -47,7 +47,7 @@ public class PlayerCrouchAnimator : MonoBehaviour
     private IEnumerator CrouchCoroutine(bool crouching)
     {
         float startTime = Time.time;
-        float endTime = startTime + transitionTime;
+        float endTime = startTime + (constValues.SlideTransitionTime * 1.75f);
         float t;
 
         float previousHeight = player.Controller.height;
@@ -56,17 +56,19 @@ public class PlayerCrouchAnimator : MonoBehaviour
         Vector3 previousCenter = new Vector3(0, player.Controller.center.y, 0);
         Vector3 nextCenter = new Vector3(0, crouching ? crouchYCenter : originalYCenter, 0);
 
-        Vector3 previousCameraPos = new Vector3(0, player.CameraHolder.localPosition.y, 0);
+        Vector3 previousCameraPos = new Vector3(0, player.Camera.transform.localPosition.y, 0);
         Vector3 nextCameraPos = new Vector3(0, crouching ? crouchCameraY : originalCameraY, 0);
 
         while (Time.time < endTime)
         {
+            // TODO: Keep checking if can proceed with standing up animation
+
             t = Mathf.InverseLerp(startTime, endTime, Time.time);
             t = crouchCurve.Evaluate(t);
 
             player.Controller.height = Mathf.Lerp(previousHeight, nextHeight, t);
             player.Controller.center = Vector3.Lerp(previousCenter, nextCenter, t);
-            player.CameraHolder.localPosition = Vector3.Lerp(previousCameraPos, nextCameraPos, t);
+            player.Camera.transform.localPosition = Vector3.Lerp(previousCameraPos, nextCameraPos, t);
 
             yield return null;
         }

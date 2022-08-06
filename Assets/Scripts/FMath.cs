@@ -10,4 +10,10 @@ public class FMath : MonoBehaviour
     }*/
 
     public const float TAU = Mathf.PI / 2;
+
+    public static float Remap(float min1, float max1, float min2, float max2, float value)
+    {
+        float t = Mathf.InverseLerp(min1, max1, value);
+        return Mathf.Lerp(min2, max2, t);
+    }
 }

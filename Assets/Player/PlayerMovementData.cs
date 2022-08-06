@@ -14,7 +14,10 @@ public class PlayerMovementData
     public float verticalVel;
     public float appliedVerticalVel;
     public Vector3 finalVelocity;
-    
+    public bool jumping;
+    public bool hitCeiling;
+    public float lastGroundY;
+
     public float Gravity { get; private set; }
     public float JumpForce { get; private set; }
     public float SlideJumpForce { get; private set; }

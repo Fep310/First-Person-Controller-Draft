@@ -7,12 +7,15 @@ public class Player : MonoBehaviour
     public Transform Transform { get; private set; }
 
     [SerializeField] private new Camera camera;
+    [SerializeField] private Transform yRotTf;
     [SerializeField] private Transform cameraHolder;
     [SerializeField] private CameraFovController fovController;
+    [SerializeField] private CameraAnimations cameraAnimations;
     [SerializeField] private PlayerCrouchAnimator playerCrouchAnimator;
     [SerializeField] private CharacterController controller;
     [SerializeField] private PlayerConstantMovementValues constMovementValues;
     [SerializeField] private PlayerInputData inputData;
+    [SerializeField] private SwordBehaviour swordBehaviour;
     public PlayerDebugUI debug;
 
     public Camera Camera
@@ -23,6 +26,9 @@ public class Player : MonoBehaviour
 
     public CameraFovController FovController
     { get => fovController; private set => fovController = value; }
+
+    public CameraAnimations CameraAnimations
+    { get => cameraAnimations; private set => cameraAnimations = value; }
 
     public PlayerCrouchAnimator CrouchAnimator
     { get => playerCrouchAnimator; private set => playerCrouchAnimator = value; }
@@ -60,6 +66,8 @@ public class Player : MonoBehaviour
             ConstMovementValues.SlideJumpHeight, ConstMovementValues.SlideJumpTime);
         StateMachine = new PlayerStateMachine();
         States = new PlayerStates(this, Controller, StateMachine, ConstMovementValues, MovementData, InputData);
+
+        Controller.enableOverlapRecovery = true;
 
         Application.targetFrameRate = 144;
     }
@@ -114,9 +122,6 @@ public class Player : MonoBehaviour
         CalculateWorldPlayerDir();
 
         StateMachine.CurrentState.OnUpdate();
-        /*debug.SetDebugText(
-            $"verticalVel: {MovementData.verticalVel}\n" +
-            $"applied: {MovementData.appliedVerticalVel}");*/
     }
 
     private void LockCursor()
@@ -128,19 +133,19 @@ public class Player : MonoBehaviour
     private void HandleRotation()
     {
         var mouseDelta = InputData.MouseDeltaInput;
-        var mouseSens = constMovementValues.MouseLookSensitivity;
+        var mouseSens = constMovementValues.MouseLookSensitivity * (swordBehaviour.Charging ? swordBehaviour.MouseSensetivityMultiplier : 1);
 
         MovementData.cameraXRotation -= mouseDelta.y * mouseSens;
         MovementData.cameraXRotation = Mathf.Clamp(MovementData.cameraXRotation, -89, 89);
         Camera.transform.localRotation = Quaternion.Euler(MovementData.cameraXRotation, 0, 0);
 
         MovementData.playerYRotation += mouseDelta.x * mouseSens;
-        Transform.rotation = Quaternion.Euler(0, MovementData.playerYRotation, 0);
+        yRotTf.rotation = Quaternion.Euler(0, MovementData.playerYRotation, 0);
     }
 
     private void CalculateWorldPlayerDir()
     {
         var horMovInput = InputData.HorizontalMovementInput;
-        MovementData.worldPlayerDiretion = Transform.TransformDirection(new Vector3(horMovInput.x, 0, horMovInput.y));
+        MovementData.worldPlayerDiretion = yRotTf.TransformDirection(new Vector3(horMovInput.x, 0, horMovInput.y));
     }
 }

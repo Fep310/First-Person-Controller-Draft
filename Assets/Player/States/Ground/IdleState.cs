@@ -26,30 +26,43 @@ public class IdleState : GroundParentState
             stateMachine.ChangeState(states.IdleCrouch);
     }
 
-    public override void OnEnter(PlayerState previous) => base.OnEnter(previous);
+    public override void OnEnter(PlayerState previous)
+    {
+        base.OnEnter(previous);
 
-    public override void OnExit(PlayerState next) { /*Debug.Log("Exiting Idle");*/ }
+        player.CameraAnimations.UpdateSway(0);
+    }
 
+    public override void OnExit(PlayerState next) => base.OnExit(next);
     public override void OnUpdate()
     {
         DoChecks();
 
+        WorldPlayerDirectionOnSlopes();
+
+        player.debug.SetLine(6, movementData.horizontalVel.ToString());
+
+        movementData.horizontalVel = Vector2.Lerp(
+            movementData.horizontalVel,
+            Vector2.zero,
+            constValues.HorizontalDeacceleration * Time.deltaTime);
+
+        player.debug.SetLine(7, movementData.horizontalVel.ToString());
+
+        movementData.finalVelocity = new Vector3(movementData.horizontalVel.x, movementData.appliedVerticalVel, movementData.horizontalVel.y);
+        //movementData.finalVelocity.Scale(movementData.worldPlayerDiretion);
+
+        ApplyVelocity();
+
         // Deaccelerate if moving
-        if (movementData.horizontalVel.sqrMagnitude >= float.Epsilon)
+        /*if (movementData.horizontalVel.sqrMagnitude >= float.Epsilon)
         {
-            WorldPlayerDirectionOnSlopes();
+            
+        }*/
 
-            movementData.horizontalVel = Vector2.Lerp(
-                movementData.horizontalVel,
-                Vector2.zero,
-                constValues.HorizontalDeacceleration * Time.deltaTime);
-
-            movementData.finalVelocity = new Vector3(movementData.horizontalVel.x, movementData.appliedVerticalVel, movementData.horizontalVel.y);
-            movementData.finalVelocity.Scale(movementData.worldPlayerDiretion);
-
-            ApplyVelocity();
-        }
+        if (crouching)
+            TryToStandup();
     }
 
-    protected override void ApplyJumpForce() => base.ApplyJumpForce();
+    public override void ApplyJumpForce() => base.ApplyJumpForce();
 }

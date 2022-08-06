@@ -14,8 +14,11 @@ public abstract class AirParentState : PlayerState
 
     public override void DoChecks()
     {
-        if (CheckCeiling())
-            movementData.verticalVel = movementData.appliedVerticalVel = -.2f;
+        if (CheckCeiling() && !movementData.hitCeiling)
+        {
+            movementData.verticalVel = movementData.appliedVerticalVel = 0;
+            movementData.hitCeiling = true;
+        }
 
         if (!decreasedBoolAlready && !inputData.IsPressingSprint)
         {
@@ -23,7 +26,7 @@ public abstract class AirParentState : PlayerState
             player.FovController.DecreaseFov();
         }
 
-        if (!jumping && CheckGround())
+        if (!movementData.jumping && CheckGround())
         {
             if (inputData.HorizontalMovementInput == Vector2.zero)
             {

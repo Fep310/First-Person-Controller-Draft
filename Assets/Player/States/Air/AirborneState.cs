@@ -10,22 +10,53 @@ public class AirborneState : AirParentState
     {
     }
 
+    private PlayerState previous;
     private float slideBoost;
     private float endSlideBoostTime;
     private float slideBoostInter;
     private bool doSlideBoost;
+    private bool canCoyote;
+    private bool hasFallStarted;
 
     public override void DoChecks()
     {
         base.DoChecks();
+
+        if (canCoyote && Time.time - startTime > constValues.CoyoteTime)
+            canCoyote = false;
+
+        if (canCoyote && inputData.IsPressingJump)
+        {
+            canCoyote = false;
+            hasFallStarted = false;
+
+            switch (previous)
+            {
+                case WalkState:
+                    states.Walk.ApplyJumpForce();
+                    return;
+
+                case RunState:
+                    states.Run.ApplyJumpForce();
+                    return;
+
+                case SlideState:
+                    states.Slide.ApplyJumpForce();
+                    return;
+            }
+        }
     }
 
     public override void OnEnter(PlayerState previous)
     {
         base.OnEnter(previous);
+
+        this.previous = previous;
+
         startTime = Time.time;
         slideBoost = 0;
         doSlideBoost = false;
+        hasFallStarted = false;
 
         if (previous is SlideState)
         {
@@ -34,6 +65,9 @@ public class AirborneState : AirParentState
             slideBoostInter = 0;
             doSlideBoost = true;
         }
+
+        canCoyote = !movementData.jumping && previous is GroundParentState;
+
     }
 
     public override void OnExit(PlayerState next) { }
@@ -41,6 +75,8 @@ public class AirborneState : AirParentState
     public override void OnUpdate()
     {
         DoChecks();
+
+        player.CameraAnimations.UpdateSway(inputData.HorizontalMovementInput.x);
 
         if (doSlideBoost)
         {
@@ -65,8 +101,15 @@ public class AirborneState : AirParentState
 
         movementData.appliedVerticalVel = (oldVerticalVel + movementData.verticalVel) * .5f;
 
-        if (movementData.verticalVel <= 0)
-            jumping = false;
+        if (movementData.verticalVel < 0)
+        {
+            movementData.jumping = false;
+            if (!hasFallStarted)
+            {
+                movementData.lastGroundY = player.Transform.position.y;
+                hasFallStarted = true;
+            }
+        }
 
         // Construct finalVelocity
         movementData.finalVelocity = new Vector3(movementData.horizontalVel.x, movementData.appliedVerticalVel, movementData.horizontalVel.y);
